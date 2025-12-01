@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from payment import PayType, Payable
 
 class DessertItem(ABC):
     def __init__(self, name, tax_percent = 7.25):
@@ -12,6 +13,22 @@ class DessertItem(ABC):
     def calculate_tax(self):
         price = self.calculate_cost() * (self.tax_percent/100)
         return round(price, 2)
+    
+    def __eq__(self, other):
+        return self.calculate_cost() == other.calculate_cost()
+    
+    def __gt__(self, other):
+        return self.calculate_cost() > other.calculate_cost()
+    
+    def __lt__(self, other):
+        return self.calculate_cost() < other.calculate_cost()
+    
+    def __ge__(self, other):
+        return self.calculate_cost() >= other.calculate_cost()
+    
+    def __le__(self, other):
+        return self.calculate_cost() <= other.calculate_cost()
+    
 
 
 class Candy(DessertItem):
@@ -80,6 +97,7 @@ class Sundae(IceCream):
 class Order:
     def __init__(self):
         self.order = []
+        self._pay_type = None
 
     def __str__(self):
         result = ";".join(str(item) for item in self.order)
@@ -95,7 +113,7 @@ class Order:
             small_list = item.split(",")
             data.append(small_list)
         
-        data.append(["----------------------------", "------", "-----------"])
+        #data.append(["----------------------------", "------", "-----------"])
         data.append(["Order Subtotal: ", self.order_tax(), self.order_cost()])
         data.append(["Order Total: ", "-----", round(self.order_tax()+self.order_cost(),2)])
         data.append(["Items in Order: ", "-----", len(self.order)])
@@ -121,6 +139,20 @@ class Order:
         for item in self.order:
             total_tax += item.calculate_tax()
         return round(total_tax, 2)
+    
+    def get_pay_type(self) -> PayType:
+        if self._pay_type not in ("CASH", "CARD", "PHONE"):
+            raise ValueError(f"Invalid Pay Type: {self._pay_type}")
+        return self._pay_type
+    
+    def set_pay_type(self, payment_method: PayType) -> None:
+        if payment_method not in ("CASH", "CARD", "PHONE"):
+            raise ValueError(f"Cannot store -> Invalid Pay Type: {payment_method}")
+        self._pay_type = payment_method
+
+    def sort(self):
+        new_list = sorted(self.order)
+        self.order = new_list
     
 
             

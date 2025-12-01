@@ -35,6 +35,18 @@ class DessertShop:
 
 
 
+def collect_payment(order):
+    payment = input("\nHow will you pay?(1-3)\n-->")
+    if payment == "1":
+       order.set_pay_type("CASH")
+    elif payment == "2":
+       order.set_pay_type("CARD")
+    elif payment == "3":
+       order.set_pay_type("PHONE")
+    else:
+       print("Payment Type is invalid") 
+       collect_payment(order)
+
 def main():
     order = Order()
     shop = DessertShop()
@@ -72,9 +84,24 @@ def main():
           print(f'{item.name} has been added to your order.')
         case _:            
           print('Invalid response:  Please enter a choice from the menu (1-4) or Enter\n-->')
+    print("\n\n\n")
+    print("""1:CASH
+2:CARD
+3:PHONE""")
+    
+
+    collect_payment(order)
+    order.sort()
+      
+
 
     print("\n\n\n\n")
     print(tabulate(order.to_list(), headers = ["Name", "Cost", "Tax"], tablefmt="fancy_grid"))
+    print("-----------------------------------")
+    print(f"Paid with {order.get_pay_type()}")
+    print("-----------------------------------")
+    print("\n\n")
+    
 
     
 
