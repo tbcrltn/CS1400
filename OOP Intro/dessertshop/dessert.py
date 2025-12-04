@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 from payment import PayType, Payable
+from combine import Combineable
+
 
 class DessertItem(ABC):
     def __init__(self, name, tax_percent = 7.25):
@@ -45,6 +47,18 @@ class Candy(DessertItem):
         
         return f"{self.name} - ({self.packaging})\n-     {self.candy_weight} lbs. @ ${self.price_per_pound}/lb,${self.calculate_cost()},[Tax: ${self.calculate_tax()}]"
 
+    def can_combine(self, other: "Candy") -> bool:
+        return (
+            isinstance(other, Candy)
+            and self.name.lower() == other.name.lower()
+            and self.price_per_pound == other.price_per_pound
+        )
+    
+    def combine(self, other: "Candy") -> "Candy":
+        if not isinstance(other, Candy):
+            raise TypeError('"Other" object is not instance of "Candy" object')
+        self.candy_weight += other.candy_weight
+        return self
     
 class Cookie(DessertItem):
     def __init__(self, name, cookie_ammount, price_per_dozen, packaging = "Box"):
@@ -59,8 +73,18 @@ class Cookie(DessertItem):
     def __str__(self):
         return f"{self.name} - ({self.packaging})\n-     {self.cookie_ammount} cookies. @ ${self.price_per_dozen}/dozen,${self.calculate_cost()},[Tax: ${self.calculate_tax()}]"
 
-
-
+    def can_combine(self, other: "Cookie") -> bool:
+        return(
+            isinstance(other, Cookie)
+            and self.name.lower() == other.name.lower()
+            and self.price_per_dozen == other.price_per_dozen
+        )
+    
+    def combine(self, other: "Cookie") -> "Cookie":
+        if not isinstance(other, Cookie):
+            raise TypeError('"Other" object is not instance of "Cookie" object')
+        self.cookie_ammount += other.cookie_ammount
+        return self
 
 class IceCream(DessertItem):
     def __init__(self, name, scoop_count = 0, price_per_scoop = 0, packaging = "Bowl"):
@@ -122,7 +146,13 @@ class Order:
 
  
     def add(self, item):
+        if isinstance(item, Combineable):
+            for other in self.order:
+                if item.can_combine(other):
+                    item.combine(other)
+                    self.order.remove(other)
         self.order.append(item)
+        
 
     def print_names(self):
         for item in self.order:
@@ -154,6 +184,11 @@ class Order:
         new_list = sorted(self.order)
         self.order = new_list
     
+    def __iter__(self):
+        return iter(self.order)
+    
+    def __next__(self):
+        return next(self.order)
 
             
 
