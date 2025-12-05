@@ -30,4 +30,15 @@ def test_sort_method():
     list1 = sorted(order.order)
     order.sort()
     assert list1 == order.order
+
+def test_iter_next():
+    order = Order()
+    order.add(Cookie("cookie", 12, 1))
+    order.add(Cookie("cookie", 12, 2))
+    order.add(Cookie("cookie", 12, 3))
+    iterator = iter(order)
+    assert next(iterator) == Cookie("cookie", 12, 1)
+    assert next(iterator) == Cookie("cookie", 12, 2)
+    assert next(iterator) == Cookie("cookie", 12, 3)
     
+
